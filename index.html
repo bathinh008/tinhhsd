@@ -2,23 +2,28 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tính Hạn Sử Dụng</title>
+<title>Tính Hạn Sử Dụng Cao Cấp</title>
 <style>
     body {
         font-family: Arial, sans-serif;
         padding: 20px;
-        max-width: 500px;
+        max-width: 450px;
         margin: auto;
-        background: #f5f7fa;
+        background: #f0f3f8;
     }
-    h2 { text-align: center; margin-bottom: 20px; }
-    label { font-weight: bold; }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 26px;
+    }
+    label { font-weight: bold; margin-top: 10px; display: block; }
     input {
         width: 100%;
         padding: 10px;
-        margin: 8px 0 15px 0;
-        border-radius: 6px;
+        margin-top: 5px;
+        border-radius: 8px;
         border: 1px solid #ccc;
+        font-size: 16px;
     }
     button {
         width: 100%;
@@ -29,99 +34,6 @@
         border-radius: 8px;
         cursor: pointer;
         font-size: 16px;
-        margin-top: 10px;
-    }
-    button:hover { background: #217dbb; }
-
-    .result-box {
-        background: white;
-        border-radius: 10px;
-        padding: 15px;
         margin-top: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .danger { color: red; font-weight: bold; }
-    .warning { color: orange; font-weight: bold; }
-    .good { color: green; font-weight: bold; }
-</style>
-</head>
-
-<body>
-
-<h2>Tính % Hạn Sử Dụng</h2>
-
-<label>Ngày sản xuất (MFG)</label>
-<input type="date" id="mfg">
-
-<label>Ngày hết hạn (EXP)</label>
-<input type="date" id="exp">
-
-<button onclick="calc()">Tính Toán</button>
-
-<div id="result"></div>
-
-<script>
-function calc() {
-    let mfg = document.getElementById("mfg").value;
-    let exp = document.getElementById("exp").value;
-
-    if (!mfg || !exp) {
-        alert("Vui lòng nhập đủ ngày sản xuất và hạn sử dụng!");
-        return;
-    }
-
-    const mfgDate = new Date(mfg);
-    const expDate = new Date(exp);
-    const today = new Date();
-
-    let total = expDate - mfgDate;
-    let used = today - mfgDate;
-
-    // Xử lý trường hợp đặc biệt
-    if (today < mfgDate) {
-        document.getElementById("result").innerHTML = `
-            <div class="result-box warning">
-                ❗ Sản phẩm chưa đến ngày sản xuất!
-            </div>`;
-        return;
-    }
-
-    if (today > expDate) {
-        document.getElementById("result").innerHTML = `
-            <div class="result-box danger">
-                ❌ Sản phẩm đã hết hạn sử dụng!
-            </div>`;
-        return;
-    }
-
-    let percentUsed = (used / total) * 100;
-    let percentLeft = 100 - percentUsed;
-
-    percentUsed = percentUsed.toFixed(2);
-    percentLeft = percentLeft.toFixed(2);
-
-    let statusClass = "good";
-    let statusText = "Còn hạn dùng tốt";
-
-    if (percentLeft < 30) {
-        statusClass = "danger";
-        statusText = "⚠️ Sắp hết hạn!";
-    } else if (percentLeft < 60) {
-        statusClass = "warning";
-        statusText = "🟡 Hạn sử dụng trung bình";
-    }
-
-    document.getElementById("result").innerHTML = `
-        <div class="result-box">
-            <p><b>Ngày sản xuất:</b> ${mfg}</p>
-            <p><b>Hạn sử dụng:</b> ${exp}</p>
-            <p><b>% đã dùng:</b> ${percentUsed}%</p>
-            <p><b>% còn lại:</b> ${percentLeft}%</p>
-            <p class="${statusClass}"><b>Kết luận:</b> ${statusText}</p>
-        </div>
-    `;
-}
-</script>
-
-</body>
-</html>
+    button:hover { backgrou
