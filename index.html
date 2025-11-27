@@ -3,11 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>Tính Hạn Sử Dụng Cao Cấp</title>
+
+<!-- POPUP CALENDAR (Flatpickr) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <style>
     body {
         font-family: Arial, sans-serif;
         padding: 20px;
-        max-width: 450px;
+        max-width: 480px;
         margin: auto;
         background: #f0f3f8;
     }
@@ -23,21 +28,108 @@
         margin-top: 5px;
         border-radius: 8px;
         border: 1px solid #ccc;
-        font-size: 16px;
+        font-size: 17px;
     }
-    button {
-        width: 100%;
-        padding: 12px;
-        background: #3498db;
+
+    .btn-small {
+        padding: 10px 14px;
+        background: #8e44ad;
         color: white;
         border: none;
-        border-radius: 8px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 16px;
-        margin-top: 20px;
+        margin: 8px 6px 0 0;
+        font-size: 15px;
+        min-width: 100px;
     }
-    button:hover { background: #217dbb; }
 
+    .btn-small.minus {
+        background: #c0392b;
+    }
+
+	.btn-row {
+		display: flex;
+		gap: 10px;
+		margin-top: 20px;
+	}
+
+	/* Hàng chứa 2 nút */
+	.btn-row {
+		display: flex;
+		gap: 10px;
+		margin-top: 20px;
+	}
+
+	/* 2 nút chia đều */
+	.btn-row button {
+		flex: 1;
+		padding: 12px;
+		font-size: 17px;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+	/* Nút tính toán */
+	.main-btn {
+		background: #3498db;
+		color: white;
+	}
+
+	.main-btn:hover {
+		background: #217dbb;
+	}
+
+	/* Nút làm mới */
+	.refresh-btn {
+		background: #7f8c8d;
+		color: white;
+	}
+
+	.refresh-btn:hover {
+		background: #636e72;
+	}
+
+    /* Accordion Box */
+    .acc-header {
+        background: #dfe6e9;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+    }
+
+    .acc-header:hover {
+        background: #b2bec3;
+    }
+
+    .acc-header .arrow {
+        font-size: 18px;
+        margin-right: 10px;
+        transition: transform 0.25s ease;
+    }
+
+    .acc-header.open .arrow {
+        transform: rotate(90deg);
+    }
+
+    .acc-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease;
+        padding-left: 4px;
+    }
+
+    .acc-body-inner {
+        padding: 8px 0 5px 10px;
+    }
+
+    /* Result + history */
     .result-box {
         background: white;
         border-radius: 12px;
@@ -66,9 +158,13 @@
     .warning { color: #e67e22; font-weight: bold; }
     .good { color: #27ae60; font-weight: bold; }
 
-    .emoji {
-        font-size: 22px;
-        margin-right: 6px;
+    .history-box {
+        background: white;
+        border-radius: 10px;
+        padding: 12px;
+        margin-top: 20px;
+        font-size: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 </style>
 </head>
@@ -78,50 +174,191 @@
 <h2>🧮 Tính Hạn Sử Dụng</h2>
 
 <label>Ngày sản xuất (MFG)</label>
-<input type="date" id="mfg">
+<input id="mfg" placeholder="dd/mm/yyyy" inputmode="numeric">
+
+
+<!-- ====================================== -->
+<!--       ACCORDION: CỘNG THÁNG          -->
+<!-- ====================================== -->
+
+<div class="acc-header" onclick="toggleAcc('accAdd')">
+    <span class="arrow">▸</span> Cộng tháng HSD nhanh
+</div>
+<div id="accAdd" class="acc-body">
+    <div class="acc-body-inner">
+        <button class="btn-small" onclick="addMonths(1)">+ 1 tháng</button>
+        <button class="btn-small" onclick="addMonths(6)">+ 6 tháng</button>
+        <button class="btn-small" onclick="addMonths(12)">+ 1 năm</button>
+    </div>
+</div>
+
+
+<!-- ====================================== -->
+<!--       ACCORDION: TRỪ THÁNG           -->
+<!-- ====================================== -->
+
+<div class="acc-header" onclick="toggleAcc('accMinus')">
+    <span class="arrow">▸</span> Trừ tháng HSD nhanh
+</div>
+<div id="accMinus" class="acc-body">
+    <div class="acc-body-inner">
+        <button class="btn-small minus" onclick="addMonths(-1)">− 1 tháng</button>
+        <button class="btn-small minus" onclick="addMonths(-6)">− 6 tháng</button>
+        <button class="btn-small minus" onclick="addMonths(-12)">− 1 năm</button>
+    </div>
+</div>
+
 
 <label>Hạn sử dụng (EXP)</label>
-<input type="date" id="exp">
+<input id="exp" placeholder="dd/mm/yyyy" inputmode="numeric">
 
-<button onclick="calc()">Tính Toán</button>
+
+
+<!-- NÚT TÍNH + LÀM MỚI -->
+<div class="btn-row">
+    <button class="main-btn" onclick="calc()">Tính Toán</button>
+    <button class="refresh-btn" onclick="resetAll()">Làm mới</button>
+</div>
 
 <div id="result"></div>
 
+<h3>Lịch sử gần đây:</h3>
+<div id="history" class="history-box"></div>
+
+
 <script>
-function formatDate(dateStr) {
-    let d = new Date(dateStr);
+/* ---------- Popup lịch ---------- */
+const fpMFG = flatpickr("#mfg", {
+    dateFormat: "d/m/Y",
+    allowInput: true
+});
+
+const fpEXP = flatpickr("#exp", {
+    dateFormat: "d/m/Y",
+    allowInput: true
+});
+
+
+/* ---------- ACCORDION ---------- */
+function toggleAcc(id) {
+    const body = document.getElementById(id);
+    const header = body.previousElementSibling;
+
+    if (body.style.maxHeight) {
+        body.style.maxHeight = null;
+        header.classList.remove("open");
+    } else {
+        body.style.maxHeight = body.scrollHeight + "px";
+        header.classList.add("open");
+    }
+}
+
+
+/* ---------- Xử lý ngày ---------- */
+function parseDMY(str) {
+    const [d, m, y] = str.split("/");
+    return new Date(y, m - 1, d);
+}
+
+function formatDate(d) {
     let day = String(d.getDate()).padStart(2, "0");
     let month = String(d.getMonth() + 1).padStart(2, "0");
     let year = d.getFullYear();
     return `${day}/${month}/${year}`;
 }
 
+
+/* ---------- Cộng / Trừ tháng ---------- */
+function addMonths(monthToAdd) {
+    let mfg = document.getElementById("mfg").value;
+    let exp = document.getElementById("exp").value;
+
+    if (!mfg) {
+        alert("Vui lòng nhập ngày sản xuất trước!");
+        return;
+    }
+
+    let baseDate = exp ? parseDMY(exp) : parseDMY(mfg);
+
+    baseDate.setMonth(baseDate.getMonth() + monthToAdd);
+
+    let maxDate = parseDMY(mfg);
+    maxDate.setFullYear(maxDate.getFullYear() + 20);
+
+    let minDate = parseDMY(mfg);
+
+    if (baseDate > maxDate) {
+        alert("⚠ Giới hạn tối đa là 20 năm kể từ ngày sản xuất!");
+        baseDate = maxDate;
+    }
+
+    if (baseDate < minDate) {
+        alert("⚠ Không thể nhỏ hơn ngày sản xuất!");
+        baseDate = minDate;
+    }
+
+    fpEXP.setDate(baseDate, true);
+}
+
+
+/* ---------- Lưu lịch sử ---------- */
+function saveHistory(mfg, exp, text) {
+    let list = JSON.parse(localStorage.getItem("HSD_HISTORY") || "[]");
+
+    list.unshift({ mfg, exp, text, time: new Date().toLocaleString("vi-VN") });
+
+    if (list.length > 10) list.pop();
+
+    localStorage.setItem("HSD_HISTORY", JSON.stringify(list));
+
+    renderHistory();
+}
+
+function renderHistory() {
+    let box = document.getElementById("history");
+    let list = JSON.parse(localStorage.getItem("HSD_HISTORY") || "[]");
+
+    box.innerHTML = list
+        .map(x => `
+            <div style="margin-bottom:6px;">
+                <b>${x.mfg}</b> → <b>${x.exp}</b><br>
+                <i>${x.text}</i> <br>
+                <small>${x.time}</small>
+                <hr>
+            </div>
+        `)
+        .join("");
+}
+
+renderHistory();
+
+
+/* ---------- Tính HSD ---------- */
 function calc() {
     let mfg = document.getElementById("mfg").value;
     let exp = document.getElementById("exp").value;
 
     if (!mfg || !exp) {
-        alert("Vui lòng nhập đủ ngày sản xuất và hạn sử dụng!");
+        alert("Vui lòng nhập đầy đủ ngày!");
         return;
     }
 
-    const mfgDate = new Date(mfg);
-    const expDate = new Date(exp);
+    const mfgDate = parseDMY(mfg);
+    const expDate = parseDMY(exp);
     const today = new Date();
 
     let total = expDate - mfgDate;
     let used = today - mfgDate;
 
-    // Xử lý ngoại lệ
     if (today < mfgDate) {
-        document.getElementById("result").innerHTML = `
-            <div class="result-box warning">❗ Sản phẩm chưa đến ngày sản xuất!</div>`;
+        document.getElementById("result").innerHTML =
+            `<div class='result-box warning'>❗ Sản phẩm chưa tới ngày sản xuất!</div>`;
         return;
     }
 
     if (today > expDate) {
-        document.getElementById("result").innerHTML = `
-            <div class="result-box danger">❌ Sản phẩm đã hết hạn sử dụng!</div>`;
+        document.getElementById("result").innerHTML =
+            `<div class='result-box danger'>❌ ĐÃ HẾT HẠN!</div>`;
         return;
     }
 
@@ -131,48 +368,50 @@ function calc() {
     percentUsed = percentUsed.toFixed(2);
     percentLeft = percentLeft.toFixed(2);
 
-    // Đếm ngược số ngày còn lại
     const daysLeft = Math.ceil((expDate - today) / (1000 * 3600 * 24));
 
-    // Emoji + màu trạng thái
     let emoji = "🟢";
-    let statusClass = "good";
-    let statusText = "Còn hạn sử dụng tốt";
+    let cls = "good";
+    let msg = "Còn hạn sử dụng tốt";
 
     if (percentLeft < 30) {
-        emoji = "🔴";
-        statusClass = "danger";
-        statusText = "Sắp hết hạn!";
+        emoji = "🔴"; cls = "danger"; msg = "Sắp hết hạn!";
     } else if (percentLeft < 60) {
-        emoji = "🟡";
-        statusClass = "warning";
-        statusText = "Hạn sử dụng trung bình";
+        emoji = "🟡"; cls = "warning"; msg = "Hạn sử dụng trung bình";
     }
 
-    // Màu progress bar
-    let barColor = "#27ae60";
-    if (percentLeft < 30) barColor = "red";
-    else if (percentLeft < 60) barColor = "#e67e22";
+    let color = cls === "danger" ? "red" :
+                cls === "warning" ? "#e67e22" :
+                "#27ae60";
 
     document.getElementById("result").innerHTML = `
         <div class="result-box">
-            <p><b>Ngày sản xuất:</b> ${formatDate(mfg)}</p>
-            <p><b>Hạn sử dụng:</b> ${formatDate(exp)}</p>
-            <p><b>Ngày còn lại:</b> ${daysLeft} ngày</p>
+            <p><b>Ngày sản xuất:</b> ${mfg}</p>
+            <p><b>Hạn sử dụng:</b> ${exp}</p>
+            <p><b>Còn lại:</b> ${daysLeft} ngày</p>
 
             <div class="progress-bar">
-                <div class="progress-fill" style="width:${percentUsed}%; background:${barColor}"></div>
+                <div class="progress-fill" style="width:${percentUsed}%; background:${color}"></div>
             </div>
 
             <p><b>% đã dùng:</b> ${percentUsed}%</p>
             <p><b>% còn lại:</b> ${percentLeft}%</p>
 
-            <p class="${statusClass}">
-                <span class="emoji">${emoji}</span>
-                <b>Kết luận:</b> ${statusText}
-            </p>
+            <p class="${cls}">${emoji} <b>Kết luận:</b> ${msg}</p>
         </div>
     `;
+
+    saveHistory(mfg, exp, msg);
+}
+
+function resetAll() {
+    document.getElementById("mfg").value = "";
+    document.getElementById("exp").value = "";
+    
+    fpMFG.clear();
+    fpEXP.clear();
+
+    document.getElementById("result").innerHTML = "";
 }
 </script>
 
