@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Tính Hạn Sử Dụng</title>
+<title>Tính Hạn Sử Dụng Cao Cấp</title>
 
 <!-- POPUP CALENDAR -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -252,6 +252,25 @@
 			margin-top: 8vw;
 		}
 	}
+	
+	select {
+		width: 100%;
+		padding: 14px;
+		margin-top: 6px;
+		border-radius: 10px;
+		border: 1px solid #ccc;
+		font-size: 18px;
+		background: white;
+	}
+
+	@media (max-width: 480px) {
+		select {
+			font-size: 5vw;
+			padding: 4vw;
+			border-radius: 3vw;
+		}
+	}
+
 </style>
 </head>
 
@@ -288,6 +307,24 @@
 
 <label>Hạn sử dụng (EXP)</label>
 <input id="exp" placeholder="dd/mm/yyyy" inputmode="numeric">
+
+<!-- COMBO BOX TÍNH NGƯỢC EXP → MFG (ẩn mặc định) -->
+<div id="reverseBox" style="display:none; margin-top: 12px;">
+    <label>Chọn hạn dùng để tính ngược MFG</label>
+    <select id="hsdSelect" onchange="reverseCalcMFG()">
+        <option value="">-- Chọn HSD --</option>
+		<option value="3">3 tháng</option>
+        <option value="6">6 tháng</option>
+		<option value="7">7 tháng</option>
+        <option value="9">9 tháng</option>
+        <option value="12">12 tháng (1 năm)</option>
+        <option value="24">24 tháng (2 năm)</option>
+        <option value="36">36 tháng (3 năm)</option>
+        <option value="48">48 tháng (4 năm)</option>
+        <option value="60">60 tháng (5 năm)</option>
+		<option value="84">84 tháng (7 năm)</option>
+    </select>
+</div>
 
 <!-- NÚT TÍNH + LÀM MỚI -->
 <div class="btn-row">
@@ -525,9 +562,26 @@ function saveHistory(mfg, exp, msg) {
 }
 
 function resetAll() {
-    document.getElementById("mfg").value = "";
-    document.getElementById("exp").value = "";
+    const mfgInput = document.getElementById("mfg");
+    const expInput = document.getElementById("exp");
+
+    // Xóa nội dung ô
+    mfgInput.value = "";
+    expInput.value = "";
+
+    // Bỏ readonly để nhập lại
+    mfgInput.readOnly = false;
+
+    // Xóa kết quả
     document.getElementById("result").innerHTML = "";
+
+    // Reset select box tính ngược
+    const hs = document.getElementById("hsdSelect");
+    if (hs) hs.value = "";
+
+    // Ẩn lại combo box
+    const box = document.getElementById("reverseBox");
+    if (box) box.style.display = "none";
 }
 
 function renderHistory() {
@@ -548,8 +602,61 @@ function renderHistory() {
         .join("");
 }
 renderHistory();
+
+// =============================
+//  HIỆN / ẨN COMBO BOX TÍNH NGƯỢC
+// =============================
+function updateReverseBox() {
+    const mfg = document.getElementById("mfg").value.trim();
+    const exp = document.getElementById("exp").value.trim();
+    const box = document.getElementById("reverseBox");
+
+    // Điều kiện hiển thị:
+    // EXP đã nhập + MFG đang trống
+    if (exp !== "" && mfg === "") {
+        box.style.display = "block";
+    } else {
+        box.style.display = "none";
+    }
+}
+
+// Theo dõi 2 ô input
+document.getElementById("mfg").addEventListener("input", updateReverseBox);
+document.getElementById("exp").addEventListener("input", updateReverseBox);
+
+
+// =============================
+//  TÍNH NGƯỢC EXP → MFG
+// =============================
+function reverseCalcMFG() {
+    let exp = document.getElementById("exp").value;
+    let hsd = document.getElementById("hsdSelect").value;
+
+    if (!exp) {
+        alert("Vui lòng nhập hạn sử dụng trước!");
+        document.getElementById("hsdSelect").value = "";
+        return;
+    }
+
+    if (!hsd) return;
+
+    let expDate = parseDMY(exp);
+    let newMFG = new Date(expDate);
+
+    newMFG.setMonth(newMFG.getMonth() - parseInt(hsd));
+
+    // Cập nhật MFG
+    const mfgInput = document.getElementById("mfg");
+    mfgInput.value = formatDate(newMFG);
+
+    // KHÓA ô MFG theo yêu cầu
+    mfgInput.readOnly = true;
+
+    // Ẩn lại combo box
+    document.getElementById("reverseBox").style.display = "none";
+}
+
 </script>
 
 </body>
 </html>
-
