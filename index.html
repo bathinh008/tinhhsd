@@ -2,7 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tính Hạn Sử Dụng</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Tính Hạn Sử Dụng Cao Cấp</title>
 
 <!-- POPUP CALENDAR -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -16,11 +17,13 @@
         margin: auto;
         background: #f0f3f8;
     }
+
     h2 {
         text-align: center;
         margin-bottom: 20px;
         font-size: 28px;
     }
+
     label { 
         font-weight: bold; 
         margin-top: 12px; 
@@ -87,6 +90,7 @@
         padding: 12px 0 6px 10px;
     }
 
+    /* Nút tính toán / làm mới */
     .btn-row {
         display: flex;
         gap: 12px;
@@ -108,6 +112,7 @@
     .refresh-btn { background: #7f8c8d; color: white; }
     .refresh-btn:hover { background: #636e72; }
 
+    /* Kết quả */
     .result-box {
         background: white;
         border-radius: 14px;
@@ -137,6 +142,7 @@
     .warning { color: #e67e22; font-weight: bold; }
     .good { color: #27ae60; font-weight: bold; }
 
+    /* Lịch sử */
     .history-box {
         background: white;
         border-radius: 12px;
@@ -146,6 +152,106 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
+    /* ========================== */
+    /* 📱 TỐI ƯU CHO MOBILE */
+    /* ========================== */
+    @media (max-width: 480px) {
+
+		html, body {
+			font-size: 4.5vw;
+			padding: 0;
+			margin: 0;
+		}
+
+		body {
+			padding: 5vw;           /* đều trái – phải */
+			box-sizing: border-box; /* tránh tràn */
+		}
+
+		h2 {
+			font-size: 7vw;
+			margin: 0 0 5vw 0;
+			text-align: center;
+		}
+
+		label {
+			font-size: 5vw;
+			margin: 4vw 0 2vw 0;
+			display: block;
+		}
+
+		input {
+			width: 100%;
+			font-size: 5vw;
+			padding: 4vw;
+			border-radius: 3vw;
+			box-sizing: border-box;
+		}
+
+		/* Nút nhỏ trong accordion */
+		.btn-small {
+			font-size: 4.8vw;
+			padding: 4vw;
+			min-width: 32vw;
+			border-radius: 3vw;
+			margin: 3vw 3vw 0 0;
+		}
+
+		.acc-header {
+			font-size: 5.2vw;
+			padding: 4vw;
+			border-radius: 3vw;
+			margin-top: 4vw;
+			box-sizing: border-box;
+		}
+
+		.acc-header .arrow {
+			font-size: 6vw;
+			margin-right: 3vw;
+		}
+
+		.acc-body-inner {
+			padding: 4vw 0 2vw 3vw;
+		}
+
+		/* Dòng chứa 2 nút tính & làm mới */
+		.btn-row {
+			display: flex;
+			gap: 3vw;
+			margin-top: 5vw;
+		}
+
+		.btn-row button {
+			flex: 1;
+			font-size: 5vw;
+			padding: 5vw 0;
+			border-radius: 3vw;
+			box-sizing: border-box;
+			width: 100%;
+		}
+
+		.result-box {
+			padding: 5vw;
+			font-size: 5vw;
+			margin-top: 6vw;
+			border-radius: 3vw;
+			line-height: 1.55;
+		}
+
+		.progress-bar {
+			height: 7vw;
+			border-radius: 4vw;
+			margin: 4vw 0;
+			width: 100%;
+		}
+
+		.history-box {
+			padding: 4vw;
+			font-size: 4.5vw;
+			border-radius: 3vw;
+			margin-top: 8vw;
+		}
+	}
 </style>
 </head>
 
@@ -236,10 +342,33 @@ function autoFormatDateInput(el) {
 // =============================
 // 3) Khởi tạo input theo thiết bị
 // =============================
+function enforcePCDateFormat(el, fp) {
+    el.addEventListener("input", function () {
+        let v = el.value.replace(/\D/g, "");
+
+        if (v.length >= 8) {
+            let d = v.slice(0, 2);
+            let m = v.slice(2, 4);
+            let y = v.slice(4, 8);
+
+            let formatted = `${d}/${m}/${y}`;
+            el.value = formatted;
+
+            // Đồng bộ vào flatpickr
+            fp.setDate(formatted, true);
+        }
+    });
+}
+
 if (!isMobile) {
     // PC dùng popup lịch
-    flatpickr("#mfg", { dateFormat: "d/m/Y", allowInput: true });
-    flatpickr("#exp", { dateFormat: "d/m/Y", allowInput: true });
+    //flatpickr("#mfg", { dateFormat: "d/m/Y", allowInput: true });
+    //flatpickr("#exp", { dateFormat: "d/m/Y", allowInput: true });
+	const fp1 = flatpickr("#mfg", { dateFormat: "d/m/Y", allowInput: true });
+    const fp2 = flatpickr("#exp", { dateFormat: "d/m/Y", allowInput: true });
+
+    enforcePCDateFormat(document.getElementById("mfg"), fp1);
+    enforcePCDateFormat(document.getElementById("exp"), fp2);
 } else {
     // Mobile: chỉ dùng auto-format, không popup
     autoFormatDateInput(document.getElementById("mfg"));
@@ -423,4 +552,3 @@ renderHistory();
 
 </body>
 </html>
-
